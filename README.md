@@ -1,6 +1,6 @@
 # WebRandomX
 
-WebRandomX is based on [RandomX](https://github.com/tevador/RandomX) proof of work (PoW) for web use cases.
+WebRandomX is a JavaScript/WASM implementation of [RandomX](https://github.com/tevador/RandomX) PoW for web use cases.
 
 ## Build
 
@@ -10,7 +10,7 @@ Prerequisites: emcc, cmake, make
 git clone https://github.com/pikapikapikachuuu/WebRandomX.git
 cd WebRandomX
 mkdir build && cd build
-emcmake cmake -DARCH=native ..
+emcmake cmake -DARCH=native .. (optional) [-DWASM_DEBUG=xxx]
 make
 ```
 

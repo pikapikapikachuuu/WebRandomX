@@ -1,3 +1,5 @@
+# Copyright (c) 2020, pikachu <hooraypikachu@gmail.com>
+# 
 # Copyright (c) 2019, The Monero Project
 # 
 # All rights reserved.
@@ -28,7 +30,7 @@
 
 cmake_minimum_required(VERSION 2.8.7)
 
-project(RandomX)
+project(WebRandomX)
 
 set(randomx_sources
 src/aes_hash.cpp
@@ -170,7 +172,7 @@ if(ARM_ID STREQUAL "aarch64" OR ARM_ID STREQUAL "arm64" OR ARM_ID STREQUAL "armv
   endif()
 endif()
 
-set(RANDOMX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE STRING "RandomX Include path")
+set(RANDOMX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE STRING "WebRandomX Include path")
 
 add_library(randomx ${randomx_sources})
 
@@ -189,6 +191,20 @@ install(TARGETS randomx
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+add_executable(randomx-api-example1
+  src/tests/api-example1.cpp)
+target_link_libraries(randomx-api-example1
+  PRIVATE randomx)
+set_property(TARGET randomx-api-example1 PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET randomx-api-example1 PROPERTY CXX_STANDARD 11)
+
+add_executable(randomx-api-example2
+  src/tests/api-example2.cpp)
+target_link_libraries(randomx-api-example2
+  PRIVATE randomx)
+set_property(TARGET randomx-api-example2 PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET randomx-api-example2 PROPERTY CXX_STANDARD 11)
+
 add_executable(randomx-tests
   src/tests/tests.cpp)
 target_link_libraries(randomx-tests
@@ -200,7 +216,6 @@ add_executable(randomx-codegen
   src/tests/code-generator.cpp)
 target_link_libraries(randomx-codegen
   PRIVATE randomx)
-
 set_property(TARGET randomx-codegen PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-codegen PROPERTY CXX_STANDARD 11)
 
@@ -230,3 +245,7 @@ if(NOT HAVE_CXX_ATOMICS)
 endif()
 set_property(TARGET randomx-benchmark PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-benchmark PROPERTY CXX_STANDARD 11)
+
+if(WASM_DEBUG)
+  set_target_properties("${WASM_DEBUG}" PROPERTIES LINK_FLAGS "-g4 -s ASSERTIONS=2")
+endif(WASM_DEBUG)
