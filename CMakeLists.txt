@@ -28,7 +28,7 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 3.10.2)
 
 project(WebRandomX)
 
@@ -249,3 +249,8 @@ set_property(TARGET randomx-benchmark PROPERTY CXX_STANDARD 11)
 if(WASM_DEBUG)
   set_target_properties("${WASM_DEBUG}" PROPERTIES LINK_FLAGS "-g4 -s ASSERTIONS=2")
 endif(WASM_DEBUG)
+
+get_directory_property(targets BUILDSYSTEM_TARGETS)
+foreach(target ${targets})
+  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1")
+endforeach()
