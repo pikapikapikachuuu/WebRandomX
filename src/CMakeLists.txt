@@ -33,30 +33,30 @@ cmake_minimum_required(VERSION 3.10.2)
 project(WebRandomX)
 
 set(randomx_sources
-src/aes_hash.cpp
-src/argon2_ref.c
-src/argon2_ssse3.c
-src/argon2_avx2.c
-src/bytecode_machine.cpp
-src/cpu.cpp
-src/dataset.cpp
-src/soft_aes.cpp
-src/virtual_memory.cpp
-src/vm_interpreted.cpp
-src/allocator.cpp
-src/assembly_generator_x86.cpp
-src/instruction.cpp
-src/randomx.cpp
-src/superscalar.cpp
-src/vm_compiled.cpp
-src/vm_interpreted_light.cpp
-src/argon2_core.c
-src/blake2_generator.cpp
-src/instructions_portable.cpp
-src/reciprocal.c
-src/virtual_machine.cpp
-src/vm_compiled_light.cpp
-src/blake2/blake2b.c)
+cpp/aes_hash.cpp
+cpp/argon2_ref.c
+cpp/argon2_ssse3.c
+cpp/argon2_avx2.c
+cpp/bytecode_machine.cpp
+cpp/cpu.cpp
+cpp/dataset.cpp
+cpp/soft_aes.cpp
+cpp/virtual_memory.cpp
+cpp/vm_interpreted.cpp
+cpp/allocator.cpp
+cpp/assembly_generator_x86.cpp
+cpp/instruction.cpp
+cpp/randomx.cpp
+cpp/superscalar.cpp
+cpp/vm_compiled.cpp
+cpp/vm_interpreted_light.cpp
+cpp/argon2_core.c
+cpp/blake2_generator.cpp
+cpp/instructions_portable.cpp
+cpp/reciprocal.c
+cpp/virtual_machine.cpp
+cpp/vm_compiled_light.cpp
+cpp/blake2/blake2b.c)
 
 if(NOT ARCH_ID)
   # allow cross compiling
@@ -100,28 +100,28 @@ endfunction()
 # x86-64
 if(ARCH_ID STREQUAL "x86_64" OR ARCH_ID STREQUAL "x86-64" OR ARCH_ID STREQUAL "amd64")
   list(APPEND randomx_sources
-    src/jit_compiler_x86.cpp)
+    cpp/jit_compiler_x86.cpp)
 
   if(MSVC)
     enable_language(ASM_MASM)
-    list(APPEND randomx_sources src/jit_compiler_x86_static.asm)
+    list(APPEND randomx_sources cpp/jit_compiler_x86_static.asm)
 
-    set_property(SOURCE src/jit_compiler_x86_static.asm PROPERTY LANGUAGE ASM_MASM)
+    set_property(SOURCE cpp/jit_compiler_x86_static.asm PROPERTY LANGUAGE ASM_MASM)
 
-    set_source_files_properties(src/argon2_avx2.c COMPILE_FLAGS /arch:AVX2)
+    set_source_files_properties(cpp/argon2_avx2.c COMPILE_FLAGS /arch:AVX2)
 
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/asm/configuration.asm
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cpp/asm/configuration.asm
       COMMAND powershell -ExecutionPolicy Bypass -File h2inc.ps1 ..\\src\\configuration.h > ..\\src\\asm\\configuration.asm SET ERRORLEVEL = 0
       COMMENT "Generating configuration.asm at ${CMAKE_CURRENT_SOURCE_DIR}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vcxproj)
     add_custom_target(generate-asm
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/asm/configuration.asm)
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpp/asm/configuration.asm)
   else()
-    list(APPEND randomx_sources src/jit_compiler_x86_static.S)
+    list(APPEND randomx_sources cpp/jit_compiler_x86_static.S)
 
     # cheat because cmake and ccache hate each other
-    set_property(SOURCE src/jit_compiler_x86_static.S PROPERTY LANGUAGE C)
-    set_property(SOURCE src/jit_compiler_x86_static.S PROPERTY XCODE_EXPLICIT_FILE_TYPE sourcecode.asm)
+    set_property(SOURCE cpp/jit_compiler_x86_static.S PROPERTY LANGUAGE C)
+    set_property(SOURCE cpp/jit_compiler_x86_static.S PROPERTY XCODE_EXPLICIT_FILE_TYPE sourcecode.asm)
 
     if(ARCH STREQUAL "native")
       add_flag("-march=native")
@@ -130,11 +130,11 @@ if(ARCH_ID STREQUAL "x86_64" OR ARCH_ID STREQUAL "x86-64" OR ARCH_ID STREQUAL "a
       add_flag("-maes")
       check_c_compiler_flag(-mssse3 HAVE_SSSE3)
       if(HAVE_SSSE3)
-        set_source_files_properties(src/argon2_ssse3.c COMPILE_FLAGS -mssse3)
+        set_source_files_properties(cpp/argon2_ssse3.c COMPILE_FLAGS -mssse3)
       endif()
       check_c_compiler_flag(-mavx2 HAVE_AVX2)
       if(HAVE_AVX2)
-        set_source_files_properties(src/argon2_avx2.c COMPILE_FLAGS -mavx2)
+        set_source_files_properties(cpp/argon2_avx2.c COMPILE_FLAGS -mavx2)
       endif()
     endif()
   endif()
@@ -151,11 +151,11 @@ endif()
 # ARMv8
 if(ARM_ID STREQUAL "aarch64" OR ARM_ID STREQUAL "arm64" OR ARM_ID STREQUAL "armv8-a")
   list(APPEND randomx_sources
-    src/jit_compiler_a64_static.S
-    src/jit_compiler_a64.cpp)
+    cpp/jit_compiler_a64_static.S
+    cpp/jit_compiler_a64.cpp)
   # cheat because cmake and ccache hate each other
-  set_property(SOURCE src/jit_compiler_a64_static.S PROPERTY LANGUAGE C)
-  set_property(SOURCE src/jit_compiler_x86_static.S PROPERTY XCODE_EXPLICIT_FILE_TYPE sourcecode.asm)
+  set_property(SOURCE cpp/jit_compiler_a64_static.S PROPERTY LANGUAGE C)
+  set_property(SOURCE cpp/jit_compiler_x86_static.S PROPERTY XCODE_EXPLICIT_FILE_TYPE sourcecode.asm)
 
   # not sure if this check is needed
   include(CheckIncludeFile)
@@ -183,7 +183,7 @@ endif()
 set_property(TARGET randomx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx PROPERTY CXX_STANDARD 11)
 set_property(TARGET randomx PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET randomx PROPERTY PUBLIC_HEADER src/randomx.h)
+set_property(TARGET randomx PROPERTY PUBLIC_HEADER cpp/randomx.h)
 
 include(GNUInstallDirs)
 install(TARGETS randomx
@@ -191,29 +191,33 @@ install(TARGETS randomx
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+# 
+# Add executables
+# 
+
 add_executable(randomx-api-example1
-  src/tests/api-example1.cpp)
+  cpp/tests/api-example1.cpp)
 target_link_libraries(randomx-api-example1
   PRIVATE randomx)
 set_property(TARGET randomx-api-example1 PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-api-example1 PROPERTY CXX_STANDARD 11)
 
 add_executable(randomx-api-example2
-  src/tests/api-example2.cpp)
+  cpp/tests/api-example2.cpp)
 target_link_libraries(randomx-api-example2
   PRIVATE randomx)
 set_property(TARGET randomx-api-example2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-api-example2 PROPERTY CXX_STANDARD 11)
 
 add_executable(randomx-tests
-  src/tests/tests.cpp)
+  cpp/tests/tests.cpp)
 target_link_libraries(randomx-tests
   PRIVATE randomx)
 set_property(TARGET randomx-tests PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-tests PROPERTY CXX_STANDARD 11)
 
 add_executable(randomx-codegen
-  src/tests/code-generator.cpp)
+  cpp/tests/code-generator.cpp)
 target_link_libraries(randomx-codegen
   PRIVATE randomx)
 set_property(TARGET randomx-codegen PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -225,7 +229,7 @@ if(NOT Threads_FOUND AND UNIX AND NOT APPLE)
 endif()
 
 add_executable(randomx-benchmark
-  src/tests/benchmark.cpp)
+  cpp/tests/benchmark.cpp)
 target_link_libraries(randomx-benchmark
   PRIVATE randomx
   PRIVATE ${CMAKE_THREAD_LIBS_INIT})
@@ -246,11 +250,17 @@ endif()
 set_property(TARGET randomx-benchmark PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx-benchmark PROPERTY CXX_STANDARD 11)
 
+# 
+# Set WASM compiler options
+# 
+
 if(WASM_DEBUG)
   set_target_properties("${WASM_DEBUG}" PROPERTIES LINK_FLAGS "-g4 -s ASSERTIONS=2")
 endif(WASM_DEBUG)
 
 get_directory_property(targets BUILDSYSTEM_TARGETS)
 foreach(target ${targets})
-  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1")
+  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s SIDE_MODULE=1 -s ALLOW_MEMORY_GROWTH=1")
 endforeach()
+
+set(CMAKE_EXECUTABLE_SUFFIX ".wasm")

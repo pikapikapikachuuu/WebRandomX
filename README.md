@@ -8,8 +8,8 @@ WebRandomX is a JavaScript/WASM implementation of [RandomX](https://github.com/t
 Prerequisites: emcc, cmake, make
 ```
 git clone https://github.com/pikapikapikachuuu/WebRandomX.git
-cd WebRandomX
-mkdir build && cd build
+cd WebRandomX/src
+mkdir bin && cd bin
 emcmake cmake -DARCH=native .. (optional) [-DWASM_DEBUG=xxx]
 make
 ```
