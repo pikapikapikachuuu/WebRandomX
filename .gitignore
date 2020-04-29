@@ -6,3 +6,5 @@ obj/
 x64/
 Release/
 Debug/
+node_modules/
+dist/
