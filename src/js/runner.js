@@ -1,35 +1,29 @@
-/* eslint-disable camelcase */
-const binRoot = '../bin/'
+import AsyncClass from './async-class'
+import * as path from 'path'
 
-import randomx_api_example2 from '../bin/randomx-api-example2'
+// template string didnt work...dont know why, seems like a webpack bug
+// const binRoot = '../bin/'
 
-class Runner {
+class Runner extends AsyncClass {
   constructor (moduleName) {
-    const init = (async () => {
-      // const randomx_api_example2 = await import(`${binRoot}${moduleName}.js`).default
-      const module = await randomx_api_example2({ wasmBinaryFile: `${binRoot}${moduleName}.wasm` })
-      module.calledRun = true
-
-      this.module = randomx_api_example2
-      window.module = this.module
-
-      delete this.then
-      return this
-    })()
-    this.then = init.then.bind(init)
+    super(async () => {
+      const Module = (await import('../bin/' + moduleName + '.js')).default
+      const wasmFile = (await import('../bin/' + moduleName + '.wasm')).default
+      const module = Module({
+        locateFile (path) {
+          if (path.endsWith('.wasm')) {
+            return wasmFile
+          }
+          return path
+        }
+      })
+      // this.module = module
+      module.onRuntimeInitialized = () => {
+        console.log(module._fib(4))
+      }
+    })
   }
 }
-
-// class Runner {
-//   constructor (moduleName) {
-//     import(`${binRoot}${moduleName}.js`).then((m) => {
-//       m({ wasmBinaryFile: `${binRoot}${moduleName}.wasm` })
-//       m.calledRun = true
-//       this.module = m
-//       window.module = this.module
-//     })
-//   }
-// }
 
 export {
   Runner as default

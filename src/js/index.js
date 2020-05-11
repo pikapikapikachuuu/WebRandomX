@@ -1,8 +1,5 @@
-import Runner from './runner.js'
+import Runner from './runner'
 
-const runApi = async () => {
-  const runner = await new Runner('randomx-api-example2')
-  runner.module._main()
-}
-
-window.onload = runApi
+;(async () => {
+  const runner = await new Runner('engine')
+})()
