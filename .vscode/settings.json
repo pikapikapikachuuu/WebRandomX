@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.har": "json",
+    "chrono": "cpp",
+    "xhash": "cpp",
+    "xutility": "cpp"
+  }
+}

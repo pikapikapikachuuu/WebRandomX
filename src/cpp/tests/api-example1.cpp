@@ -1,10 +1,17 @@
 #include "../randomx.h"
+#include "../web_randomx.h"
+#include <malloc.h>
 #include <stdio.h>
 
-int main() {
+EM_PORT_API(char*)  example() {
 	const char myKey[] = "RandomX example key";
 	const char myInput[] = "RandomX example input";
-	char hash[RANDOMX_HASH_SIZE];
+
+	// exchange data with js via memory
+	char* hash = (char*)malloc(RANDOMX_HASH_SIZE * sizeof(char));
+	if (NULL == hash) {
+		return NULL;
+	}
 
 	randomx_flags flags = randomx_get_flags();
 	randomx_cache *myCache = randomx_alloc_cache(flags);
@@ -16,10 +23,10 @@ int main() {
 	randomx_destroy_vm(myMachine);
 	randomx_release_cache(myCache);
 
-	for (unsigned i = 0; i < RANDOMX_HASH_SIZE; ++i)
-		printf("%02x", hash[i] & 0xff);
+	return hash;
+}
 
-	printf("\n");
-
-	return 0;
+// release allocated memory
+EM_PORT_API(void) freeBuff(void* buf) {
+	free(buf);
 }
