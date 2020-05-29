@@ -180,6 +180,10 @@ if(TARGET generate-asm)
   add_dependencies(randomx generate-asm)
 endif()
 
+# soft float
+add_subdirectory(cpp/softfloat)
+target_link_libraries(randomx PRIVATE softfloat)
+
 set_property(TARGET randomx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx PROPERTY CXX_STANDARD 11)
 set_property(TARGET randomx PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -260,7 +264,7 @@ endif(WASM_DEBUG)
 
 get_directory_property(targets BUILDSYSTEM_TARGETS)
 foreach(target ${targets})
-  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1")
+  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1")
 endforeach()
 
 # set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
