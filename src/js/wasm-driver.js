@@ -17,11 +17,14 @@ class WASMDriver extends AsyncClass {
             }
             return path
           }
-        }).then(m => {
+        })
+
+        // https://github.com/emscripten-core/emscripten/pull/10697 fixed this!
+        // .then(m => {
         // emcc's `thenable` implementation may cause infinite loop
         // https://github.com/emscripten-core/emscripten/issues/5820
-          delete m['then']
-        })
+        //   delete m['then']
+        // })
 
         this._module = module
         this._name = moduleName

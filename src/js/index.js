@@ -6,7 +6,7 @@ import { RANDOMX_HASH_SIZE } from './constants'
 
   const raw = driver.example()
 
-  const bias = raw >> 1
+  const bias = raw >> 0
   let str = ''
   for (let i = 0; i < RANDOMX_HASH_SIZE; i++) {
     str += (driver.heapChar[bias + i] & 0xff).toString(16)
