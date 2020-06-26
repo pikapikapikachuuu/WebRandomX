@@ -180,10 +180,6 @@ if(TARGET generate-asm)
   add_dependencies(randomx generate-asm)
 endif()
 
-# soft float
-add_subdirectory(cpp/softfloat)
-target_link_libraries(randomx PRIVATE softfloat)
-
 set_property(TARGET randomx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx PROPERTY CXX_STANDARD 11)
 set_property(TARGET randomx PROPERTY CXX_STANDARD_REQUIRED ON)
