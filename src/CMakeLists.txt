@@ -254,13 +254,11 @@ set_property(TARGET randomx-benchmark PROPERTY CXX_STANDARD 11)
 # Set WASM compiler options
 # 
 
-if(WASM_DEBUG)
-  set_target_properties("${WASM_DEBUG}" PROPERTIES LINK_FLAGS "-g4 -s ASSERTIONS=2")
-endif(WASM_DEBUG)
-
 get_directory_property(targets BUILDSYSTEM_TARGETS)
 foreach(target ${targets})
-  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1")
+  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1 -s -msse")
 endforeach()
+
+set_target_properties(randomx-api-example1 PROPERTIES LINK_FLAGS " -s MODULARIZE=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1 -s -msse")
 
 # set(CMAKE_EXECUTABLE_SUFFIX ".wasm")

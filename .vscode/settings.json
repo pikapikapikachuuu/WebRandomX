@@ -3,6 +3,7 @@
     "*.har": "json",
     "chrono": "cpp",
     "xhash": "cpp",
-    "xutility": "cpp"
+    "xutility": "cpp",
+    "cstdint": "cpp"
   }
 }
