@@ -13,8 +13,7 @@ struct softdouble {
   softdouble() { v = 0; }
   softdouble(const softdouble& s) { v = s.v; }
   softdouble& operator=(const softdouble& s) {
-    if (&s != this)
-      v = s.v;
+    if (&s != this) v = s.v;
     return *this;
   }
 
@@ -50,26 +49,12 @@ struct softdouble {
   softdouble operator-(const softdouble&) const;
   softdouble operator*(const softdouble&) const;
   softdouble operator/(const softdouble&) const;
+  softdouble operator%(const softdouble&) const;
   softdouble operator-() const {
     softdouble x;
     x.v = v ^ (1ULL << 63);
     return x;
   }
-  /**
-  A quote from original softdouble manual:
-
-  > The IEEE Standard remainder operation computes the value
-  > a - n * b, where n is the integer closest to a / b.
-  > If a / b is exactly halfway between two integers, n is the even integer
-  > closest to a / b. The IEEE Standard’s remainder operation is always exact
-  and so requires no rounding.
-  > Depending on the relative magnitudes of the
-  operands, the remainder functions can take considerably longer to execute
-  than the other softdouble functions. This is an inherent characteristic of
-  the remainder operation itself and is not a flaw in the softdouble
-  implementation.
-  */
-  softdouble operator%(const softdouble&) const;
 
   softdouble& operator+=(const softdouble& a) {
     *this = *this + a;

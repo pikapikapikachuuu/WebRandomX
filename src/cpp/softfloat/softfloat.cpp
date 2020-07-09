@@ -42,6 +42,8 @@ static inline void raiseFlags(uint_fast8_t /* flags */) {
   (((~(a)&UINT64_C(0x7FF0000000000000)) == 0) && \
    ((a)&UINT64_C(0x000FFFFFFFFFFFFF)))
 
+// Type used to pass 64-bit floating-point arguments and results to/from
+// functions
 typedef softdouble float64_t;
 
 // Integer-to-floating-point conversion routines
@@ -149,6 +151,11 @@ static float64_t softfloat_subMagsF64(uint_fast64_t, uint_fast64_t, bool);
 
 /*----------------------------------------------------------------------------
  *----------------------------------------------------------------------------*/
+static inline uint64_t softfloat_shortShiftRightJam64(uint64_t a,
+                                                      uint_fast8_t dist) {
+  return a >> dist | ((a & (((uint_fast64_t)1 << dist) - 1)) != 0);
+}
+
 static inline uint64_t softfloat_shiftRightJam64(uint64_t a,
                                                  uint_fast32_t dist) {
   // fixed unsigned unary minus: -x == ~x + 1
@@ -171,6 +178,20 @@ static const uint_least8_t softfloat_countLeadingZeros8[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+static inline uint_fast8_t softfloat_countLeadingZeros32(uint32_t a) {
+  uint_fast8_t count = 0;
+  if (a < 0x10000) {
+    count = 16;
+    a <<= 16;
+  }
+  if (a < 0x1000000) {
+    count += 8;
+    a <<= 8;
+  }
+  count += softfloat_countLeadingZeros8[a >> 24];
+  return count;
+}
+
 static uint_fast8_t softfloat_countLeadingZeros64(uint64_t a);
 
 /*----------------------------------------------------------------------------
@@ -186,6 +207,62 @@ static struct uint128 softfloat_mul64To128(uint64_t a, uint64_t b);
  *----------------------------------------------------------------------------*/
 /*----------------------------------------------------------------------------
  *----------------------------------------------------------------------------*/
+static float64_t ui32_to_f64(uint32_t a) {
+  uint_fast64_t uiZ;
+  int_fast8_t shiftDist;
+
+  if (!a) {
+    uiZ = 0;
+  } else {
+    shiftDist = softfloat_countLeadingZeros32(a) + 21;
+    uiZ = packToF64UI(0, 0x432 - shiftDist, (uint_fast64_t)a << shiftDist);
+  }
+  return float64_t::fromRaw(uiZ);
+}
+
+static float64_t ui64_to_f64(uint64_t a) {
+  if (!a) {
+    return float64_t::fromRaw(0);
+  }
+  if (a & UINT64_C(0x8000000000000000)) {
+    return softfloat_roundPackToF64(0, 0x43D,
+                                    softfloat_shortShiftRightJam64(a, 1));
+  } else {
+    return softfloat_normRoundPackToF64(0, 0x43C, a);
+  }
+}
+
+static float64_t i32_to_f64(int32_t a) {
+  uint_fast64_t uiZ;
+  bool sign;
+  uint_fast32_t absA;
+  int_fast8_t shiftDist;
+
+  if (!a) {
+    uiZ = 0;
+  } else {
+    sign = (a < 0);
+    // fixed unsigned unary minus: -x == ~x + 1
+    absA = sign ? (~(uint_fast32_t)a + 1) : (uint_fast32_t)a;
+    shiftDist = softfloat_countLeadingZeros32(absA) + 21;
+    uiZ =
+        packToF64UI(sign, 0x432 - shiftDist, (uint_fast64_t)absA << shiftDist);
+  }
+  return float64_t::fromRaw(uiZ);
+}
+
+static float64_t i64_to_f64(int64_t a) {
+  bool sign;
+  uint_fast64_t absA;
+
+  sign = (a < 0);
+  if (!(a & UINT64_C(0x7FFFFFFFFFFFFFFF))) {
+    return float64_t::fromRaw(sign ? packToF64UI(1, 0x43E, 0) : 0);
+  }
+  // fixed unsigned unary minus: -x == ~x + 1
+  absA = sign ? (~(uint_fast64_t)a + 1) : (uint_fast64_t)a;
+  return softfloat_normRoundPackToF64(sign, 0x43C, absA);
+}
 
 static float64_t f64_add(float64_t a, float64_t b) {
   uint_fast64_t uiA;
@@ -501,17 +578,11 @@ static float64_t f64_rem(float64_t a, float64_t b) {
     }
   } else {
     recip32 = softfloat_approxRecip32_1(sigB >> 21);
-    /*--------------------------------------------------------------------
-    | Changing the shift of `rem' here requires also changing the initial
-    | subtraction from `expDiff'.
-    *--------------------------------------------------------------------*/
     rem <<= 9;
     expDiff -= 30;
-    /*--------------------------------------------------------------------
-    | The scale of `sigB' affects how many bits are obtained during each
-    | cycle of the loop.  Currently this is 29 bits per loop iteration,
-    | the maximum possible.
-    *--------------------------------------------------------------------*/
+    // The scale of `sigB' affects how many bits are obtained during eachcycle
+    // of the loop Currently this is 29 bits per loop iteration, the maximum
+    // possible
     sigB <<= 9;
     for (;;) {
       q64 = (uint32_t)(rem >> 32) * (uint_fast64_t)recip32;
@@ -522,9 +593,7 @@ static float64_t f64_rem(float64_t a, float64_t b) {
       if (rem & UINT64_C(0x8000000000000000)) rem += sigB;
       expDiff -= 29;
     }
-    /*--------------------------------------------------------------------
-    | (`expDiff' cannot be less than -29 here.)
-    *--------------------------------------------------------------------*/
+    // `expDiff` cannot be less than -29 here
     q = (uint32_t)(q64 >> 32) >> (~expDiff & 31);
     rem = (rem << (expDiff + 30)) - q * (uint64_t)sigB;
     if (rem & UINT64_C(0x8000000000000000)) {
@@ -845,9 +914,7 @@ static uint_fast8_t softfloat_countLeadingZeros64(uint64_t a) {
     count = 32;
     a32 = (uint32_t)a;  // fixed warning on type cast
   }
-  /*------------------------------------------------------------------------
-  | From here, result is current count + count leading zeros of `a32'.
-  *------------------------------------------------------------------------*/
+  // From here, result is current count + count leading zeros of `a32'.
   if (a32 < 0x10000) {
     count += 16;
     a32 <<= 16;
