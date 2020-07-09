@@ -55,7 +55,6 @@ struct softdouble {
     x.v = v ^ (1ULL << 63);
     return x;
   }
-
   /**
   A quote from original softdouble manual:
 
