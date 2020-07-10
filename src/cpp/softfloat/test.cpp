@@ -9,6 +9,7 @@ int main() {
   printf("%lf\n", double(a * b));
   printf("%lf\n", double(a / b));
   printf("%lf\n", double(a % b));
+  printf("%lf\n", double(sqrt(a)));
   return 0;
 }
 
