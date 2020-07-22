@@ -40,21 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "softfloat.hpp"
 
-enum { tininess_beforeRounding = 0, tininess_afterRounding = 1 };
-// TODO
-static const uint_fast8_t globalDetectTininess = tininess_afterRounding;
+uint_fast8_t globalDetectTininess = tininess_afterRounding;
 
-enum {
-  round_near_even = 0,  // round to nearest, with ties to even
-  round_minMag = 1,     // round to minimum magnitude (toward zero)
-  round_min = 2,        // round to minimum (down)
-  round_max = 3,        // round to maximum (up)
-  round_near_maxMag =
-      4,  // round to nearest, with ties to maximum magnitude (away from zero)
-  round_odd = 5  // round to odd (jamming)
-};
-// TODO
-static const uint_fast8_t globalRoundingMode = round_near_even;
+uint_fast8_t globalRoundingMode = round_min;
 
 enum {
   flag_inexact = 1,

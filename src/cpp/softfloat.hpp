@@ -38,7 +38,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+#pragma once
+
 #include <cstdint>
+
+enum {
+  tininess_beforeRounding = 0,
+  tininess_afterRounding = 1
+};
+extern uint_fast8_t globalDetectTininess;
+
+enum {
+  round_near_even = 0,  // round to nearest, with ties to even
+  round_minMag = 1,     // round to minimum magnitude (toward zero)
+  round_min = 2,        // round to minimum (down)
+  round_max = 3,        // round to maximum (up)
+  round_near_maxMag =
+      4,  // round to nearest, with ties to maximum magnitude (away from zero)
+  round_odd = 5  // round to odd (jamming)
+};
+extern uint_fast8_t globalRoundingMode;
 
 // For faster memory accessing
 typedef union suf64 {
@@ -77,7 +96,7 @@ struct softdouble {
     v = s.u;
   }
 
-  // Type case
+  // Type cast
   operator double() const {
     suf64 s;
     s.u = v;
