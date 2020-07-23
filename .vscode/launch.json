@@ -14,6 +14,27 @@
         "webpack:///*": "${webRoot}/*"
       },
       // "preLaunchTask": "debug"
+    },
+    {
+      "name": "g++ - Build and debug active file",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/bin/randomx-tests",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/src/bin",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      // "preLaunchTask": "C/C++: g++ build active file",
+      "miDebuggerPath": "/usr/bin/gdb"
     }
   ]
 }

@@ -52,7 +52,8 @@ cpp/vm_compiled.cpp
 cpp/vm_interpreted_light.cpp
 cpp/argon2_core.c
 cpp/blake2_generator.cpp
-cpp/instructions_portable.cpp
+cpp/intrin_wasm.cpp
+cpp/softfloat.cpp
 cpp/reciprocal.c
 cpp/virtual_machine.cpp
 cpp/vm_compiled_light.cpp
@@ -180,10 +181,6 @@ if(TARGET generate-asm)
   add_dependencies(randomx generate-asm)
 endif()
 
-# soft float
-add_subdirectory(cpp/softfloat)
-target_link_libraries(randomx PRIVATE softfloat)
-
 set_property(TARGET randomx PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET randomx PROPERTY CXX_STANDARD 11)
 set_property(TARGET randomx PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -258,13 +255,11 @@ set_property(TARGET randomx-benchmark PROPERTY CXX_STANDARD 11)
 # Set WASM compiler options
 # 
 
-if(WASM_DEBUG)
-  set_target_properties("${WASM_DEBUG}" PROPERTIES LINK_FLAGS "-g4 -s ASSERTIONS=2")
-endif(WASM_DEBUG)
-
 get_directory_property(targets BUILDSYSTEM_TARGETS)
 foreach(target ${targets})
-  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s WASM=1 -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1")
+  set_target_properties("${target}" PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1 -s -msse")
 endforeach()
 
-# set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
+# set_target_properties(randomx-api-example1 PROPERTIES LINK_FLAGS " -s MODULARIZE=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s SAFE_HEAP=1 -s -msse")
+
+# # set(CMAKE_EXECUTABLE_SUFFIX ".wasm") 

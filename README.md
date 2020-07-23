@@ -18,7 +18,7 @@ Prerequisites: emcc, cmake, make
 ```
 cd WebRandomX/src
 mkdir bin && cd bin
-emcmake cmake -DARCH=native .. (optional) [-DWASM_DEBUG=xxx]
+emcmake cmake -DARCH=native ..
 make
 ```
 

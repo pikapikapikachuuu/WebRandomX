@@ -8,6 +8,15 @@
       "type": "npm",
       "script": "dev",
       "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "label": "C/C++: g++ build active file",
+      "command": "cd bin && cmake -DCMAKE_BUILD_TYPE=Debug .. && make",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }
